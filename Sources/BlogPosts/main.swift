@@ -23,7 +23,16 @@ struct BlogPosts: Website {
 }
 
 // This will generate your website using the built-in Foundation theme:
+//try BlogPosts().publish(
+//	withTheme: .xcodeDark,
+//	plugins: [.splash(withClassPrefix: "")]
+//)
+
 try BlogPosts().publish(
 	withTheme: .xcodeDark,
-	plugins: [.splash(withClassPrefix: "")]
+	deployedUsing: .gitHub(
+		"geomod/VaporBlog",   // GitHub repo in "username/repo" format
+		branch: "GHpublish",  // branch you want to deploy
+		useSSH: true          // use SSH for pushing
+	), plugins: [.splash(withClassPrefix: "")]
 )
