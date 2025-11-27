@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>Certainly Swift on the Server</title><description>How to get started and continue learning Vapor, Fluent, and anything else for Server Side Swift.</description><link>https://your-website-url.com</link><language>en</language><lastBuildDate>Thu, 27 Nov 2025 08:37:02 -0600</lastBuildDate><pubDate>Thu, 27 Nov 2025 08:37:02 -0600</pubDate><ttl>250</ttl><atom:link href="https://your-website-url.com/feed.rss" rel="self" type="application/rss+xml"/><item><guid isPermaLink="true">https://your-website-url.com/posts/BuildingAModel</guid><title>Models are the foundation of your server.</title><description>Building a Vapor Model.</description><link>https://your-website-url.com/posts/BuildingAModel</link><pubDate>Thu, 27 Nov 2025 18:00:00 -0600</pubDate><content:encoded><![CDATA[<h1>Models are the foundation of your server.</h1>]]></content:encoded></item><item><guid isPermaLink="true">https://your-website-url.com/posts/ExploringOurNewVaporProject</guid><title>Exploring our new Vapor Project</title><description>Get to know your Vapor project.</description><link>https://your-website-url.com/posts/ExploringOurNewVaporProject</link><pubDate>Wed, 15 Oct 2025 18:00:00 -0500</pubDate><content:encoded><![CDATA[<h1>Exploring your new Vapor Project</h1><p>Open your newly created project either by opening the newly created folder named SwiftlyGround and double-clicking the Package.swift file. Or if you’re still in the terminal you can navigate to the folder SwiftlyGround and type;</p><b>open Package.swift</b><p>Either method should launch Xcode and the project will begin loading quite a list of dependencies. These packages are all part of what makes Vapor run and it really isn’t necessary to know what they all do. I certainly don't.</p><p><strong>Important</strong>: Make sure you select your Mac as the run destination for this project. Xcode might select your iPhone by default if you have been building iOS apps. You will get a build error if you try building to an iOS device.</p><p>Looking around our new project, SwiftlyGround you should see the following file structure.</p><p>Starting at the top with the Package file this is where you'll see a list of dependencies and their targets. Later on you may add a package there if you wanted to incorporate Sign in with Apple for example. Among many other things.</p><pre><code><span class="comment">// swift-tools-version:6.0</span>
+<span class="keyword">import</span> PackageDescription
+
+<span class="keyword">let</span> package = <span class="type">Package</span>(
+    name: <span class="string">"SwiftlyGround"</span>,
+    platforms: [
+       .<span class="call">macOS</span>(.<span class="dotAccess">v13</span>)
+    ],
+    dependencies: [
+        <span class="comment">// 💧 A server-side Swift web framework.</span>
+        .<span class="call">package</span>(url: <span class="string">"https://github.com/vapor/vapor.git"</span>, from: <span class="string">"4.115.0"</span>),
+        <span class="comment">// 🗄 An ORM for SQL and NoSQL databases.</span>
+        .<span class="call">package</span>(url: <span class="string">"https://github.com/vapor/fluent.git"</span>, from: <span class="string">"4.9.0"</span>),
+        <span class="comment">// 🐘 Fluent driver for Postgres.</span>
+        .<span class="call">package</span>(url: <span class="string">"https://github.com/vapor/fluent-postgres-driver.git"</span>, from: <span class="string">"2.8.0"</span>),
+        <span class="comment">// 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors</span>
+        .<span class="call">package</span>(url: <span class="string">"https://github.com/apple/swift-nio.git"</span>, from: <span class="string">"2.65.0"</span>),
+    ],
+    targets: [
+        .<span class="call">executableTarget</span>(
+            name: <span class="string">"SwiftlyGround"</span>,
+            dependencies: [
+                .<span class="call">product</span>(name: <span class="string">"Fluent"</span>, package: <span class="string">"fluent"</span>),
+                .<span class="call">product</span>(name: <span class="string">"FluentPostgresDriver"</span>, package: <span class="string">"fluent-postgres-driver"</span>),
+                .<span class="call">product</span>(name: <span class="string">"Vapor"</span>, package: <span class="string">"vapor"</span>),
+                .<span class="call">product</span>(name: <span class="string">"NIOCore"</span>, package: <span class="string">"swift-nio"</span>),
+                .<span class="call">product</span>(name: <span class="string">"NIOPosix"</span>, package: <span class="string">"swift-nio"</span>),
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .<span class="call">testTarget</span>(
+            name: <span class="string">"SwiftlyGroundTests"</span>,
+            dependencies: [
+                .<span class="call">target</span>(name: <span class="string">"SwiftlyGround"</span>),
+                .<span class="call">product</span>(name: <span class="string">"VaporTesting"</span>, package: <span class="string">"vapor"</span>),
+            ],
+            swiftSettings: swiftSettings
+        )
+    ]
+)
+
+<span class="keyword">var</span> swiftSettings: [<span class="type">SwiftSetting</span>] { [
+    .<span class="call">enableUpcomingFeature</span>(<span class="string">"ExistentialAny"</span>),
+] }
+</code></pre><p>The <strong>Public</strong> folder is empty and will likely stay that way for the duration of this project. It could be used to serve static files—such as images, CSS, JavaScript, or HTML directly to the client app without routing through your Swift code.</p><p>The <strong>Sources</strong> folder is where things get interesting and we will be working heavily in the folders within Sources.</p><p><strong>Controllers</strong> – Handle requests from your client and return responses. Here's an example of an endpoint we will later add to the Controllers file;</p><pre><code>  <span class="keyword">@Sendable
+	func</span> create(<span class="keyword">_</span> req: <span class="type">Request</span>) <span class="keyword">async throws</span> -&gt; <span class="type">HTTPStatus</span> {
+		<span class="keyword">let</span> data = <span class="keyword">try</span> req.<span class="property">content</span>.<span class="call">decode</span>(<span class="type">CoffeeShopDTO</span>.<span class="keyword">self</span>)
+
+		<span class="keyword">let</span> newCoffeeShop = <span class="type">CoffeeShop</span>(
+			name: data.<span class="property">name</span>,
+			address: data.<span class="property">address</span>,
+			phoneNumber: data.<span class="property">phoneNumber</span>,
+			seatingCapacity: data.<span class="property">seatingCapacity</span>
+		)
+
+		<span class="keyword">do</span> {
+			<span class="keyword">try await</span> newCoffeeShop.<span class="call">save</span>(on: req.<span class="property">db</span>)
+			<span class="keyword">return</span> .<span class="dotAccess">ok</span>
+		} <span class="keyword">catch</span> {
+			<span class="keyword">throw</span> <span class="type">Abort</span>(.<span class="dotAccess">internalServerError</span>, reason: <span class="string">"Failed to save coffee shop"</span>)
+		}
+	}
+</code></pre><p><strong>DTO</strong> (Data Transfer Objects) – Define the shape of data sent to or from your API. For example, you might have a User model with properties for userName, city, and birthday. While your server stores all three, you may not want to include birthday in every user response. A DTO lets you define a version of the data containing only userName and city, which is safe to send to clients.</p><p><strong>Migrations</strong> – Manage changes to your database schema over time, such as creating new fields defined on existing tables.</p><p><strong>Models</strong> – Represent data structures stored in your database. Models map Swift classes to database tables and are used for querying, creating, and updating records.</p><p>You can think of your database as a collection of tables, where each table represents a specific type of data. In Vapor, each table corresponds to a Model, and the columns (or fields) in that table represent the model's properties. For example, our SwiftlyGround coffee shop could be represented by a SwiftlyGround model. Its properties like address, phoneNumber, and hoursOfOperation become the fields of the database table that store the details of the coffee shop.</p><p>The <em>configure</em> file is where we will add our Migrations to the API.</p><p>The <em>entrypoint</em> file in a Vapor project is where the app starts running. It initializes the application, sets up configurations (like routes, middleware, and database connections), and then launches the server.</p><p>Finally our routes file is where all of our controllers get initialized and added to the application.</p><p>That's a good overview of the project. In the next section we will start defining our first model for SwiftlyGround.</p><p>I hope you have enjoyed the reading so far. You can reach out to me on various social platforms.</p><p><a href="https://bsky.app/profile/danoleary.me">Bluesky</a></p><p><a href="https://x.com/devdanoleary">X</a></p><p><a href="https://www.instagram.com/devdanoleary/?igsh=NXl4MWZzejBleDRo&utm_source=qr">Instagram</a></p>]]></content:encoded></item><item><guid isPermaLink="true">https://your-website-url.com/posts/StartingUpWithVapor</guid><title>Starting up with Vapor</title><description>Setting up your first Vapor project.</description><link>https://your-website-url.com/posts/StartingUpWithVapor</link><pubDate>Fri, 10 Oct 2025 18:00:00 -0500</pubDate><content:encoded><![CDATA[<h1>Starting up with Vapor</h1><p>I have just returned from the Server Side Swift conference in London. A three-day event (if you attend the workshops on day one). The main track of the conference covered many aspects and use cases for building your sever using the Swift programming language using Vapor.</p><p>Conferences like this always leave me with the side effect of inspiration. They can also provide that final push toward something nagging in the back of my mind of a thing I think I should or could do. That nudge was given by a lightening talk from Mikaela Caron urging the community to reach out beyond the walls of the conference to spread our knowledge of Swift on the Server. Mikaela is prolific in the community and if you don’t follow her work I highly encourage you to do so across the many social platforms she is on, as well as podcasts and iOS Developer Happy Hour.</p><p>I want to take this call to action upon myself to write about how I use Vapor to support the backend of my small social network app, The Midst. Since I particularly enjoy reading coding blogs with practical examples I will attempt to provide as many of those as possible while walking you the reader, through the process of setting up and running a backend for your app.</p><p>I will start from the beginning with Vapor. But I will also assume you have Swift knowledge and Xcode installed already. I don’t think you’d be here if you weren’t. But if you are new to Swift I highly recommend reading and watching the works of Sean Allen and Paul Hudson who offer excellent and free content to get you started with Swift.</p><p>With that out of the way, lets get started with Vapor. Open up the Terminal App. We’re going to create a new project following the Vapor documentation. Eventually we will hook it up to a client, also known as an iOS app or website, but let’s not get too far ahead of ourselves.</p><p>Vapor Toolbox: Vapor uses what’s called Homebrew to install the Toolbox. Using the Toolbox we can create new projects which provide a nice template to get started. You can add Vapor packages to an existing project, but that’s not the direction I’m taking this blog. If you don’t have Homebrew installed visit <a href="https://brew.sh">https://brew.sh</a> and run the installation command.</p><p>Now with Homebrew installed, in your terminal type;</p><b>brew install vapor</b><p>After that completes we’ll create our first Vapor project. To set a theme I’m going to invent a coffee shop that we want to store information about using Vapor. You’ll want to create this project somewhere you can return to.</p><p>In your Terminal simply type <code>cd</code> and press return. You’ll see a list of folders in text format. Probably something like Applications Desktop Documents et cetera. If you’d like to create your new Vapor project on your Desktop type <code>cd Desktop</code> and press return. If you’d like to change to a folder within a folder, navigate to that folder in the Finder type <code>cd</code> then drag and drop the folder onto your Terminal and it will autofill the file path after the <code>cd</code>. Make sure there’s a space after the <code>cd</code> otherwise you’ll see a “no such file or directory” error.</p><p>Now that we’re in the desired location for our new project type;</p><b>vapor new SwiftlyGround</b><p>Swiftly Ground is the name I came up with for our coffee shop but you can of course name it whatever you like. After typing <code>vapor new SwiftlyGround</code> hit return (or enter) and the Terminal should something like this;</p><img src="https://your-website-url.com/UseFluent.jpeg" alt="Use Fluent" width="600">
+
+Use Fluent
+
+Type “y” to indicate we want to use Fluent.
+
+We want to use Fluent, which is an Object Relational Mapper. We’ll get into more of what that means later. But it basically helps us create tables and relationships on our server. 
+
+<img src="https://your-website-url.com/Postgres.jpeg" alt="Postgres" width="600">
+
+Select Postgres as the database
+
+Next we’ll selected the type of database we want to use. Stick with the recommended Postgres data by typing 1.
+
+<img src="https://your-website-url.com/UseLeaf.jpeg" alt="Postgres" width="600">
+
+Type ‘n’ to decline using Leaf.
+
+The last question in the setup process will be if we want to use what’s called Leaf. Leaf is generally used for HTML and we will not be building a website in this project so you can select `n` to decline setting up Leaf in our project. Once that completes you should see some activity in the Terminal and once everything completes you’ll be presented with the delightful Vapor icon like below.
+
+Congratulations you have just created your first Vapor project! This is the beginning of your journey to create your own custom backend for your iOS application. 
+
+Vapor project welcome screen.
+
+<img src="https://your-website-url.com/VaporDroplet.jpeg" alt="Postgres" width="600">
+
+In the next edition of the blog we will get familiar with the file system of a Vapor project. It’s a little different than a traditional iOS App you may have built before and it deserves a little time spent familiarizing yourself with it.
+]]></content:encoded></item></channel></rss>
