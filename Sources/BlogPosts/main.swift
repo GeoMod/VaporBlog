@@ -15,7 +15,7 @@ struct BlogPosts: Website {
 	}
 	
 	// Update these properties to configure your website:
-	var url = URL(string: "https://your-website-url.com")!
+	var url = URL(string: "https://geomod.github.io/VaporBlog/")!
 	var name = "Certainly Swift on the Server"
 	var description = "How to get started and continue learning Vapor, Fluent, and anything else for Server Side Swift."
 	var language: Language { .english }
