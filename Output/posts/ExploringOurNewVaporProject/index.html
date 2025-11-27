@@ -1,0 +1,63 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta property="og:site_name" content="Certainly Swift on the Server"/><link rel="canonical" href="https://your-website-url.com/posts/ExploringOurNewVaporProject"/><meta name="twitter:url" content="https://your-website-url.com/posts/ExploringOurNewVaporProject"/><meta property="og:url" content="https://your-website-url.com/posts/ExploringOurNewVaporProject"/><title>Exploring our new Vapor Project | Certainly Swift on the Server</title><meta name="twitter:title" content="Exploring our new Vapor Project | Certainly Swift on the Server"/><meta property="og:title" content="Exploring our new Vapor Project | Certainly Swift on the Server"/><meta name="description" content="Get to know your Vapor project."/><meta name="twitter:description" content="Get to know your Vapor project."/><meta property="og:description" content="Get to know your Vapor project."/><meta name="twitter:card" content="summary"/><link rel="stylesheet" href="/styles.css" type="text/css"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="shortcut icon" href="/images/favicon.png" type="image/png"/><link rel="alternate" href="/feed.rss" type="application/rss+xml" title="Subscribe to Certainly Swift on the Server"/></head><body><div class="site-container"><header><a class="home-link" href="/">← Home</a><h1>Exploring our new Vapor Project</h1></header><main class="content"><div class="post-body"><h1>Exploring your new Vapor Project</h1><p>Open your newly created project either by opening the newly created folder named SwiftlyGround and double-clicking the Package.swift file. Or if you’re still in the terminal you can navigate to the folder SwiftlyGround and type;</p><b>open Package.swift</b><p>Either method should launch Xcode and the project will begin loading quite a list of dependencies. These packages are all part of what makes Vapor run and it really isn’t necessary to know what they all do. I certainly don't.</p><p><strong>Important</strong>: Make sure you select your Mac as the run destination for this project. Xcode might select your iPhone by default if you have been building iOS apps. You will get a build error if you try building to an iOS device.</p><p>Looking around our new project, SwiftlyGround you should see the following file structure.</p><p>Starting at the top with the Package file this is where you'll see a list of dependencies and their targets. Later on you may add a package there if you wanted to incorporate Sign in with Apple for example. Among many other things.</p><pre><code><span class="comment">// swift-tools-version:6.0</span>
+<span class="keyword">import</span> PackageDescription
+
+<span class="keyword">let</span> package = <span class="type">Package</span>(
+    name: <span class="string">"SwiftlyGround"</span>,
+    platforms: [
+       .<span class="call">macOS</span>(.<span class="dotAccess">v13</span>)
+    ],
+    dependencies: [
+        <span class="comment">// 💧 A server-side Swift web framework.</span>
+        .<span class="call">package</span>(url: <span class="string">"https://github.com/vapor/vapor.git"</span>, from: <span class="string">"4.115.0"</span>),
+        <span class="comment">// 🗄 An ORM for SQL and NoSQL databases.</span>
+        .<span class="call">package</span>(url: <span class="string">"https://github.com/vapor/fluent.git"</span>, from: <span class="string">"4.9.0"</span>),
+        <span class="comment">// 🐘 Fluent driver for Postgres.</span>
+        .<span class="call">package</span>(url: <span class="string">"https://github.com/vapor/fluent-postgres-driver.git"</span>, from: <span class="string">"2.8.0"</span>),
+        <span class="comment">// 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors</span>
+        .<span class="call">package</span>(url: <span class="string">"https://github.com/apple/swift-nio.git"</span>, from: <span class="string">"2.65.0"</span>),
+    ],
+    targets: [
+        .<span class="call">executableTarget</span>(
+            name: <span class="string">"SwiftlyGround"</span>,
+            dependencies: [
+                .<span class="call">product</span>(name: <span class="string">"Fluent"</span>, package: <span class="string">"fluent"</span>),
+                .<span class="call">product</span>(name: <span class="string">"FluentPostgresDriver"</span>, package: <span class="string">"fluent-postgres-driver"</span>),
+                .<span class="call">product</span>(name: <span class="string">"Vapor"</span>, package: <span class="string">"vapor"</span>),
+                .<span class="call">product</span>(name: <span class="string">"NIOCore"</span>, package: <span class="string">"swift-nio"</span>),
+                .<span class="call">product</span>(name: <span class="string">"NIOPosix"</span>, package: <span class="string">"swift-nio"</span>),
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .<span class="call">testTarget</span>(
+            name: <span class="string">"SwiftlyGroundTests"</span>,
+            dependencies: [
+                .<span class="call">target</span>(name: <span class="string">"SwiftlyGround"</span>),
+                .<span class="call">product</span>(name: <span class="string">"VaporTesting"</span>, package: <span class="string">"vapor"</span>),
+            ],
+            swiftSettings: swiftSettings
+        )
+    ]
+)
+
+<span class="keyword">var</span> swiftSettings: [<span class="type">SwiftSetting</span>] { [
+    .<span class="call">enableUpcomingFeature</span>(<span class="string">"ExistentialAny"</span>),
+] }
+</code></pre><p>The <strong>Public</strong> folder is empty and will likely stay that way for the duration of this project. It could be used to serve static files—such as images, CSS, JavaScript, or HTML directly to the client app without routing through your Swift code.</p><p>The <strong>Sources</strong> folder is where things get interesting and we will be working heavily in the folders within Sources.</p><p><strong>Controllers</strong> – Handle requests from your client and return responses. Here's an example of an endpoint we will later add to the Controllers file;</p><pre><code>  <span class="keyword">@Sendable
+	func</span> create(<span class="keyword">_</span> req: <span class="type">Request</span>) <span class="keyword">async throws</span> -&gt; <span class="type">HTTPStatus</span> {
+		<span class="keyword">let</span> data = <span class="keyword">try</span> req.<span class="property">content</span>.<span class="call">decode</span>(<span class="type">CoffeeShopDTO</span>.<span class="keyword">self</span>)
+
+		<span class="keyword">let</span> newCoffeeShop = <span class="type">CoffeeShop</span>(
+			name: data.<span class="property">name</span>,
+			address: data.<span class="property">address</span>,
+			phoneNumber: data.<span class="property">phoneNumber</span>,
+			seatingCapacity: data.<span class="property">seatingCapacity</span>
+		)
+
+		<span class="keyword">do</span> {
+			<span class="keyword">try await</span> newCoffeeShop.<span class="call">save</span>(on: req.<span class="property">db</span>)
+			<span class="keyword">return</span> .<span class="dotAccess">ok</span>
+		} <span class="keyword">catch</span> {
+			<span class="keyword">throw</span> <span class="type">Abort</span>(.<span class="dotAccess">internalServerError</span>, reason: <span class="string">"Failed to save coffee shop"</span>)
+		}
+	}
+</code></pre><p><strong>DTO</strong> (Data Transfer Objects) – Define the shape of data sent to or from your API. For example, you might have a User model with properties for userName, city, and birthday. While your server stores all three, you may not want to include birthday in every user response. A DTO lets you define a version of the data containing only userName and city, which is safe to send to clients.</p><p><strong>Migrations</strong> – Manage changes to your database schema over time, such as creating new fields defined on existing tables.</p><p><strong>Models</strong> – Represent data structures stored in your database. Models map Swift classes to database tables and are used for querying, creating, and updating records.</p><p>You can think of your database as a collection of tables, where each table represents a specific type of data. In Vapor, each table corresponds to a Model, and the columns (or fields) in that table represent the model's properties. For example, our SwiftlyGround coffee shop could be represented by a SwiftlyGround model. Its properties like address, phoneNumber, and hoursOfOperation become the fields of the database table that store the details of the coffee shop.</p><p>The <em>configure</em> file is where we will add our Migrations to the API.</p><p>The <em>entrypoint</em> file in a Vapor project is where the app starts running. It initializes the application, sets up configurations (like routes, middleware, and database connections), and then launches the server.</p><p>Finally our routes file is where all of our controllers get initialized and added to the application.</p><p>That's a good overview of the project. In the next section we will start defining our first model for SwiftlyGround.</p><p>I hope you have enjoyed the reading so far. You can reach out to me on various social platforms.</p><p><a href="https://bsky.app/profile/danoleary.me">Bluesky</a></p><p><a href="https://x.com/devdanoleary">X</a></p><p><a href="https://www.instagram.com/devdanoleary/?igsh=NXl4MWZzejBleDRo&utm_source=qr">Instagram</a></p></div><p class="post-meta">Published: 10/15/2025, 6:00 PM</p><nav class="post-navigation"><div class="nav-links"><div class="nav-previous"><a href="/posts/StartingUpWithVapor">← Starting up with Vapor</a></div><div class="nav-next"><a href="/posts/BuildingAModel">Building a Vapor Model →</a></div></div></nav></main><footer><p><a class="home-link" href="/">← Home</a> | Tags: <a href="/tags/swift">swift</a>, <a href="/tags/vapor">vapor</a></p></footer></div></body></html>

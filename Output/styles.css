@@ -1,0 +1,231 @@
+body {
+	background-color: #0b0b0b;
+	color: #e6e6e6;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+	line-height: 1.6;
+	padding: 2rem;
+}
+
+/* Basic layout */
+.site-container {
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 0 1rem;
+	background: transparent;
+}
+
+/* Content */
+.content {
+	padding: 1.25rem 0 3rem;
+	background: transparent;
+}
+
+/* Code block container */
+pre {
+	background: #1f1f24;
+	padding: 1rem;
+	border-radius: 8px;
+	overflow-x: auto;
+	line-height: 1.45;
+	margin: 1rem 0;
+}
+
+.post-body pre {
+	background-color: #1f1f24;
+	padding: 1rem;
+	border-radius: 6px;
+	overflow-x: auto;
+}
+
+.post-body pre code {
+	color: #ffffff;
+	font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+	font-size: 0.9rem;
+	background: none;
+	display: block;
+	white-space: pre-wrap;
+	tab-size: 2;
+}
+
+.post-body code {
+	font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+	font-size: 0.9rem;
+}
+
+/* Inline code (not in pre blocks) */
+code {
+	font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+	color: #d0bf69;
+	background: rgba(255,255,255,0.05);
+	padding: 0.15rem 0.35rem;
+	border-radius: 4px;
+	font-size: 0.95em;
+}
+
+/* Reset inline code styling when inside pre */
+pre code {
+	background: none;
+	padding: 0;
+	color: inherit;
+}
+
+/* Splash/Publish syntax highlighting - Xcode Dark theme */
+.keyword { color: #fc5fa3; }
+.type { color: #5dd8ff; }
+.call { color: #67b7a4; }
+.property { color: #67b7a4; }
+.number { color: #d0bf69; }
+.string { color: #fc6a5d; }
+.comment { color: #6c7986; font-style: italic; }
+.dotAccess { color: #67b7a4; }
+.preprocessing { color: #fc5fa3; }
+
+/* Make images responsive in posts */
+.post-body img {
+	max-width: 100%;
+	height: auto;
+	display: block;
+	margin: 0.75rem auto;
+}
+
+/*.post-body img {*/
+/*	max-width: 400px;*/
+/*	height: auto;*/
+/*	display: block;*/
+/*	margin: 0.75rem auto;*/
+/*}*/
+
+/* General link styling - must come before specific overrides */
+a {
+	color: #61afef;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+/* Header styling */
+header h1 {
+	margin: 2rem 0 0.5rem;
+	font-size: 2rem;
+	color: #cc5500;
+}
+
+header p {
+	margin: 0 0 1rem;
+	color: #bdbdbd;
+}
+
+.site-description {
+	margin: 0 0 2rem;
+	color: #9aa0a6;
+	font-size: 1.1rem;
+}
+
+/* Post list */
+.recent-posts-title {
+	margin: 2rem 0 1.5rem;
+	font-size: 1.5rem;
+	color: #e6e6e6;
+}
+
+.post-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.post-preview {
+	padding-bottom: 2rem;
+	border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.post-preview:last-child {
+	border-bottom: none;
+}
+
+.post-preview h3 {
+	margin: 0 0 0.5rem;
+	font-size: 1.3rem;
+}
+
+/* Title of each individual post */
+.post-preview h3 a {
+	color: #cc5500;
+	text-decoration: none;
+}
+
+.post-preview h3 a:hover {
+	color: #e56717;
+	text-decoration: none;
+}
+
+.post-date {
+	color: #61afef;
+	font-size: 0.9rem;
+	margin: 0 0 0.75rem;
+}
+
+.post-description {
+	color: #bdbdbd;
+	line-height: 1.6;
+	margin: 0;
+}
+
+.post-meta {
+	color: #9aa0a6;
+	font-size: 0.9em;
+	margin-top: 1rem;
+}
+
+/* Navigation */
+.post-navigation {
+	margin: 3rem 0 2rem;
+	padding-top: 2rem;
+	border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-links {
+	display: flex;
+	justify-content: space-between;
+	gap: 2rem;
+}
+
+.nav-previous,
+.nav-next {
+	flex: 1;
+}
+
+.nav-previous {
+	text-align: left;
+}
+
+.nav-next {
+	text-align: right;
+}
+
+.nav-previous a,
+.nav-next a {
+	color: #61afef;
+	text-decoration: none;
+	display: inline-block;
+}
+
+.nav-previous a:hover,
+.nav-next a:hover {
+	color: #cc5500;
+}
+
+/* Home Navigation */
+.home-link {
+	display: inline-block;
+	color: #61afef;
+	text-decoration: none;
+	margin-bottom: 1rem;
+	font-size: 0.9rem;
+}
+
+.home-link:hover {
+	color: #cc5500;
+}
