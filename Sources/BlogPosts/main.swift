@@ -20,6 +20,7 @@ struct BlogPosts: Website {
 	var description = "How to get started and continue learning Vapor, Fluent, and anything else for Server Side Swift."
 	var language: Language { .english }
 	var imagePath: Path? { nil }
+	var favicon: Favicon? { nil }
 }
 
 // This will generate your website using the built-in Foundation theme:
