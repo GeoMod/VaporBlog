@@ -15,12 +15,12 @@ struct IgniteWebsite {
 }
 
 struct ExampleSite: Site {    
-    var name = "Hello World"
-    var titleSuffix = " – My Awesome Site"
+    var name = "Certainly Swift on the Server"
+    var titleSuffix = " – A Vapor Blog by Dan O'Leary"
     var url = URL(static: "https://www.example.com")
     var builtInIconsEnabled = true
 
-    var author = "John Appleseed"
+    var author = "Dan O'Leary"
 
     var homePage = Home()
     var layout = MainLayout()
